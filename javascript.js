@@ -50,6 +50,8 @@ window.onload = function () {
     },
   ];
 
+  //comment
+
   const events = document.querySelector('.events');
   const modal = document.querySelector('.modal');
   const modalTitle = document.querySelector('.modal__title');
