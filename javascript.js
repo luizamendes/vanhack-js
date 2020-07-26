@@ -50,32 +50,52 @@ window.onload = function () {
     },
   ];
 
-  //comment
-
   const events = document.querySelector('.events');
   const modal = document.querySelector('.modal');
   const modalTitle = document.querySelector('.modal__title');
-  const modalContent = document.querySelector('.modal__content');
-  const closeButton = document.getElementsByClassName('close')[0];
+  const modalContent = document.querySelector('.modal__subtitle');
+  const modalEventName = document.querySelector('.modal__event-name');
+  const closeButton = document.querySelector('.close');
+  const modalSuccess = document.querySelector('.email__submit__success');
+  const emailForm = document.querySelector('.email__submit');
+  const emailInput = document.querySelector('.email__submit__input');
+  const premiumModalStar = document.querySelector('#premium-star-modal');
+  const membershipModalButton = document.querySelector(
+    '#membership-modal-button'
+  );
+  const applicationSubmitButton = document.querySelector(
+    '#application-submit-button'
+  );
 
-  const setModalContent = (premium) => {
+  const setModalContent = (premium, name) => {
     let title = 'Apply to this event';
-    let content = 'Insert your email and click on apply';
+    let content = 'Insert your email below and click on apply';
     if (premium) {
       title = 'This is a premium-only webinar';
-      content = 'Click on the button to know more about premium membership';
+      content =
+        'Click on the button below to know more about our premium membership';
+      premiumModalStar.style.display = 'flex';
+      membershipModalButton.style.display = 'block';
+      emailForm.style.display = 'none';
+    } else {
+      premiumModalStar.style.display = 'none';
+      membershipModalButton.style.display = 'none';
+      emailForm.style.display = 'flex';
     }
-    modalTitle.innerHTML = title;
-    modalContent.innerHTML = content;
+    modalTitle.textContent = title;
+    modalContent.textContent = content;
+    modalEventName.innerHTML = `<strong>${name}</strong>`;
   };
 
-  const openModal = (premium) => {
-    setModalContent(premium);
+  const openModal = (premium, name) => {
+    setModalContent(premium, name);
     modal.style.display = 'block';
   };
 
   const closeModal = () => {
     modal.style.display = 'none';
+    modalSuccess.style.display = 'none';
+    emailInput.value = '';
   };
 
   closeButton.addEventListener('click', closeModal);
@@ -86,11 +106,21 @@ window.onload = function () {
     }
   });
 
+  const applyToEvent = (e) => {
+    e.preventDefault();
+    applicationSubmitButton.setAttribute('disabled', 'disabled');
+    setTimeout(function () {
+      modalSuccess.style.display = 'block';
+      applicationSubmitButton.removeAttribute('disabled', 'disabled');
+    }, 1000);
+  };
+
   for (let event of nextEvents) {
     const div = document.createElement('div');
 
     const title = document.createElement('h3');
     title.innerHTML = event.name;
+    title.setAttribute('name', event.name);
     div.appendChild(title);
 
     if (event.kind === 'premium') {
@@ -98,7 +128,7 @@ window.onload = function () {
       const premiumFlag = document.createElement('div');
       premiumFlag.classList.add('premium-flag');
       const star = document.createElement('i');
-      star.classList.add('fas', 'fa-star', 'checked');
+      star.classList.add('fas', 'fa-star', 'star');
       premiumFlag.appendChild(star);
       div.appendChild(premiumFlag);
     } else if (event.kind === 'spotlight') {
@@ -119,12 +149,13 @@ window.onload = function () {
 
     const description = document.createElement('p');
     description.innerHTML = event.description;
+    description.classList.add('description');
     description.hidden = true;
     div.appendChild(description);
 
     const detailsButton = document.createElement('button');
     detailsButton.textContent = 'More details';
-    detailsButton.classList.add('details-button');
+    detailsButton.classList.add('secondary-button');
     detailsButton.addEventListener('click', () => {
       description.hidden = !description.hidden;
       if (detailsButton.textContent === 'More details') {
@@ -137,9 +168,26 @@ window.onload = function () {
 
     const applyButton = document.createElement('button');
     applyButton.textContent = 'Apply now';
-    applyButton.classList.add('apply-button');
-    applyButton.addEventListener('click', () => openModal(event.premium));
+    applyButton.classList.add('primary-button');
+    applyButton.addEventListener('click', () =>
+      openModal(event.kind === 'premium', event.name)
+    );
     div.appendChild(applyButton);
+
+    const emailForm = document.querySelector('.email__submit');
+    emailForm.addEventListener('submit', applyToEvent);
+
+    const twitterDiv = document.createElement('div');
+    twitterDiv.classList.add('twitterContainer');
+    const twitterButton = document.createElement('a');
+    twitterButton.classList.add('twitter-share-button');
+    const text = `Check out this awesome VanHack event: ${event.name} @`;
+    twitterButton.href = `https://twitter.com/intent/tweet?text=${encodeURI(
+      text
+    )}`;
+    twitterButton.textContent = 'Tweet';
+    twitterDiv.appendChild(twitterButton);
+    div.appendChild(twitterDiv);
 
     div.classList.add('event-card');
 
